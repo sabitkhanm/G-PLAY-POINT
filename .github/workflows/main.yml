@@ -1,45 +1,44 @@
-name: Extract ZIP to Repository
+name: Build G-POINT APK
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'g_point_v1/**'
+      - '.github/workflows/build-apk.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  extract:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract ZIP
-        run: |
-          set -e
-          ZIP_FILE=$(find . -maxdepth 1 -type f -iname "*.zip" | head -n 1)
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
 
-          if [ -z "$ZIP_FILE" ]; then
-            echo "ERROR: ZIP file not found"
-            exit 1
-          fi
+      - name: Install dependencies
+        working-directory: g_point_v1
+        run: flutter pub get
 
-          mkdir -p extracted_temp
-          unzip -o "$ZIP_FILE" -d extracted_temp
-          cp -a extracted_temp/. .
-          rm -rf extracted_temp
+      - name: Analyze project
+        working-directory: g_point_v1
+        run: flutter analyze
 
-          echo "Extraction successful"
+      - name: Build APK
+        working-directory: g_point_v1
+        run: flutter build apk --release
 
-      - name: Commit extracted files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Extract G-POINT project files"
-            git push
-          fi
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: G-POINT-Android-APK
+          path: g_point_v1/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
