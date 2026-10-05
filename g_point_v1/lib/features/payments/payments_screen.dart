@@ -447,7 +447,7 @@ class _PaymentCard extends StatelessWidget {
       case 'Bank':
         return CupertinoIcons.building_2_fill;
       case 'Cash':
-        return CupertinoIcons.money_bill;
+        return CupertinoIcons.money_dollar;
       default:
         return CupertinoIcons.creditcard;
     }
