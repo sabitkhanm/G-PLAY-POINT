@@ -3,6 +3,8 @@ name: Build G-POINT APK
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'g_point_v1/**'
       - '.github/workflows/build-apk.yml'
@@ -26,15 +28,19 @@ jobs:
 
       - name: Generate Android platform
         working-directory: g_point_v1
-        run: flutter create . --platforms=android --project-name=g_point          
+        run: flutter create . --platforms=android --project-name=g_point
 
       - name: Install dependencies
         working-directory: g_point_v1
         run: flutter pub get
 
       - name: Analyze project
-  working-directory: g_point_v1
-  run: flutter analyze --no-fatal-infos
+        working-directory: g_point_v1
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        working-directory: g_point_v1
+        run: flutter test
 
       - name: Build APK
         working-directory: g_point_v1
