@@ -2,13 +2,272 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/app_controller.dart';
 import '../../data/models.dart';
 
-class PaymentsScreen extends StatefulWidget { const PaymentsScreen({super.key}); @override State<PaymentsScreen> createState()=>_PaymentsScreenState(); }
-class _PaymentsScreenState extends State<PaymentsScreen>{
-  Future<void> _add() async { final app=context.read<AppController>(); final s=AppStrings(app.bangla); final amount=TextEditingController(); final ref=TextEditingController(); final note=TextEditingController(); String method='Cash'; int? player;
-    final ok=await showModalBottomSheet<bool>(context:context,isScrollControlled:true,builder:(ctx)=>StatefulBuilder(builder:(ctx,setLocal)=>Padding(padding:EdgeInsets.fromLTRB(18,18,18,MediaQuery.of(ctx).viewInsets.bottom+18),child:SingleChildScrollView(child:Column(children:[Text(s.payments,style:Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight:FontWeight.w800)),const SizedBox(height:12),FutureBuilder<List<Player>>(future:app.db.getPlayers(),builder:(ctx,p)=>DropdownButtonFormField<int>(value:player,items:(p.data??const <Player>[]).map((x)=>DropdownMenuItem(value:x.id,child:Text(x.name))).toList(),onChanged:(v)=>setLocal(()=>player=v),decoration:InputDecoration(labelText:s.players,border:OutlineInputBorder(borderRadius:BorderRadius.circular(18)))),),const SizedBox(height:10),TextField(controller:amount,keyboardType:const TextInputType.numberWithOptions(decimal:true),decoration:InputDecoration(labelText:s.amount,prefixText:'৳ ',border:OutlineInputBorder(borderRadius:BorderRadius.circular(18)))),const SizedBox(height:10),DropdownButtonFormField<String>(value:method,items:const ['Cash','bKash','Nagad','Bank','Other'].map((m)=>DropdownMenuItem(value:m,child:Text(m))).toList(),onChanged:(v)=>setLocal(()=>method=v??'Cash'),decoration:InputDecoration(labelText:s.method,border:OutlineInputBorder(borderRadius:BorderRadius.circular(18)))),const SizedBox(height:10),TextField(controller:ref,decoration:InputDecoration(labelText:s.reference,border:OutlineInputBorder(borderRadius:BorderRadius.circular(18)))),const SizedBox(height:10),TextField(controller:note,decoration:InputDecoration(labelText:s.notes,border:OutlineInputBorder(borderRadius:BorderRadius.circular(18)))),const SizedBox(height:14),FilledButton(onPressed:()=>Navigator.pop(ctx,true),child:Text(s.save))]))));
-    if(ok!=true)return; final value=double.tryParse(amount.text); if(value==null||value<=0)return; await app.db.insertPayment(Payment(playerId:player,amount:value,method:method,reference:ref.text.trim(),note:note.text.trim(),createdAt:DateTime.now())); await app.refreshSummary(); setState((){}); }
-  @override Widget build(BuildContext context){final app=context.watch<AppController>(); final s=AppStrings(app.bangla); return Scaffold(floatingActionButton:FloatingActionButton.extended(onPressed:_add,icon:const Icon(CupertinoIcons.add),label:Text(s.save)),body:FutureBuilder<List<Payment>>(future:app.db.getPayments(),builder:(context,p)=>ListView(padding:const EdgeInsets.fromLTRB(16,10,16,110),children:[Text(s.payments,style:Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight:FontWeight.w800)),const SizedBox(height:12),if((p.data??const <Payment>[]).isEmpty)Padding(padding:const EdgeInsets.all(28),child:Center(child:Text(s.noData))),...(p.data??const <Payment>[]).map((e)=>Card(child:ListTile(leading:const Icon(CupertinoIcons.creditcard),title:Text('৳${e.amount.toStringAsFixed(2)}',style:const TextStyle(fontWeight:FontWeight.w800)),subtitle:Text('${e.method}${e.reference.isEmpty?'':' • ${e.reference}'}\n${DateFormat('dd MMM yyyy, hh:mm a').format(e.createdAt)}'))))])));}
+class PaymentsScreen extends StatefulWidget {
+  const PaymentsScreen({super.key});
+
+  @override
+  State<PaymentsScreen> createState() => _PaymentsScreenState();
+}
+
+class _PaymentsScreenState extends State<PaymentsScreen> {
+  Future<void> _addPayment() async {
+    final app = context.read<AppController>();
+    final strings = AppStrings(app.bangla);
+
+    final amountController = TextEditingController();
+    final referenceController = TextEditingController();
+    final noteController = TextEditingController();
+
+    String method = 'Cash';
+    int? playerId;
+
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setLocalState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                18,
+                18,
+                18,
+                MediaQuery.of(context).viewInsets.bottom + 18,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      strings.payments,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 14),
+
+                    FutureBuilder<List<Player>>(
+                      future: app.db.getPlayers(),
+                      builder: (context, snapshot) {
+                        final players =
+                            snapshot.data ?? const <Player>[];
+
+                        return DropdownButtonFormField<int>(
+                          value: playerId,
+                          items: players.map(
+                            (player) {
+                              return DropdownMenuItem<int>(
+                                value: player.id,
+                                child: Text(player.name),
+                              );
+                            },
+                          ).toList(),
+                          onChanged: (value) {
+                            setLocalState(() {
+                              playerId = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: strings.players,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: strings.amount,
+                        prefixText: '৳ ',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    DropdownButtonFormField<String>(
+                      value: method,
+                      items: const [
+                        'Cash',
+                        'bKash',
+                        'Nagad',
+                        'Bank',
+                        'Other',
+                      ].map(
+                        (item) {
+                          return DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (value) {
+                        setLocalState(() {
+                          method = value ?? 'Cash';
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: strings.method,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: referenceController,
+                      decoration: InputDecoration(
+                        labelText: strings.reference,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: noteController,
+                      decoration: InputDecoration(
+                        labelText: strings.notes,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.pop(sheetContext, true);
+                        },
+                        child: Text(strings.save),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (saved != true) {
+      return;
+    }
+
+    final amount = double.tryParse(
+      amountController.text.trim(),
+    );
+
+    if (amount == null || amount <= 0) {
+      return;
+    }
+
+    await app.db.insertPayment(
+      Payment(
+        playerId: playerId,
+        amount: amount,
+        method: method,
+        reference: referenceController.text.trim(),
+        note: noteController.text.trim(),
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    await app.refreshSummary();
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.watch<AppController>();
+    final strings = AppStrings(app.bangla);
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _addPayment,
+        icon: const Icon(CupertinoIcons.add),
+        label: Text(strings.save),
+      ),
+      body: FutureBuilder<List<Payment>>(
+        future: app.db.getPayments(),
+        builder: (context, snapshot) {
+          final payments = snapshot.data ?? const <Payment>[];
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+            children: [
+              Text(
+                strings.payments,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              const SizedBox(height: 12),
+
+              if (payments.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Center(
+                    child: Text(strings.noData),
+                  ),
+                ),
+
+              ...payments.map(
+                (payment) {
+                  final reference = payment.reference.isEmpty
+                      ? ''
+                      : ' • ${payment.reference}';
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: const Icon(
+                        CupertinoIcons.creditcard,
+                      ),
+                      title: Text(
+                        '৳${payment.amount.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${payment.method}$reference\n'
+                        '${DateFormat('dd MMM yyyy, hh:mm a').format(payment.createdAt)}',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
