@@ -115,7 +115,7 @@ class _PlayerFormScreenState extends State<PlayerFormScreen> {
   void _showError(AppStrings s, String field) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$field ${s.bangla ? 'প্রয়োজন' : 'is required'}'),
+        content: Text('$field ${s.bn ? 'প্রয়োজন' : 'is required'}'),
       ),
     );
   }
