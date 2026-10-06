@@ -11,6 +11,7 @@ import 'features/players/players_screen.dart';
 import 'features/ledger/ledger_screen.dart';
 import 'features/payments/payments_screen.dart';
 import 'features/expenses/expenses_screen.dart';
+import 'features/reports/reports_screen.dart';
 import 'features/settings/settings_screen.dart';
 
 void main() {
@@ -28,7 +29,7 @@ class GPointApp extends StatelessWidget {
         builder: (context, app, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'G-POINT',
+            title: 'G-PLAY POINT',
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: app.themeMode,
@@ -63,6 +64,14 @@ class _ShellScreenState extends State<ShellScreen> {
     PaymentsScreen(),
     ExpensesScreen(),
   ];
+
+  void _openReports() {
+    Navigator.of(context).push(
+      IosPageRoute(
+        page: const ReportsScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,13 +114,20 @@ class _ShellScreenState extends State<ShellScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'G-POINT',
+          'G-PLAY POINT',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: app.bangla ? 'রিপোর্ট' : 'Reports',
+            onPressed: _openReports,
+            icon: const Icon(
+              CupertinoIcons.chart_bar_circle,
+            ),
+          ),
           IconButton(
             tooltip: strings.settings,
             onPressed: () {
@@ -127,12 +143,10 @@ class _ShellScreenState extends State<ShellScreen> {
           ),
         ],
       ),
-
       body: IndexedStack(
         index: app.tabIndex,
         children: screens,
       ),
-
       bottomNavigationBar: NavigationBar(
         selectedIndex: app.tabIndex,
         onDestinationSelected: (index) {
