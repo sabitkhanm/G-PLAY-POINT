@@ -96,7 +96,7 @@ abstract final class AppTheme {
       headlineMedium: TextStyle(
         fontSize: 22,
         height: 1.25,
-        fontWeight: FontWeight.w750,
+        fontWeight: FontWeight.w700,
         color: text,
       ),
       titleLarge: TextStyle(
