@@ -1,4 +1,4 @@
-name: Build G-POINT APK
+name: Build G-PLAY POINT APK
 
 on:
   workflow_dispatch:
@@ -34,6 +34,10 @@ jobs:
         working-directory: g_point_v1
         run: flutter pub get
 
+      - name: Generate app icons
+        working-directory: g_point_v1
+        run: dart run flutter_launcher_icons
+
       - name: Analyze project
         working-directory: g_point_v1
         run: flutter analyze --no-fatal-infos
@@ -49,6 +53,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: G-POINT-Android-APK
+          name: G-PLAY-POINT-Android-APK
           path: g_point_v1/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
