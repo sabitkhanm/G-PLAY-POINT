@@ -629,7 +629,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       padding: const EdgeInsets.only(bottom: 9),
       child: AnimatedContainer(
         duration: MotionTokens.fast,
-        curve: MotionTokens.curve,
+        curve: MotionTokens.standardCurve,
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
