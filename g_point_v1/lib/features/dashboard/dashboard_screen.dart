@@ -50,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             sliver: SliverToBoxAdapter(
               child: AnimatedSwitcher(
                 duration: MotionTokens.page,
-                switchInCurve: MotionTokens.curve,
+                switchInCurve: MotionTokens.standardCurve,
                 switchOutCurve: Curves.easeIn,
                 child: summary == null
                     ? const _DashboardLoading(key: ValueKey('loading'))
