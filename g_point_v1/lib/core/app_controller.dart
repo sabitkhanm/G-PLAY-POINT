@@ -22,7 +22,7 @@ class AppController extends ChangeNotifier {
 class AppStrings {
   final bool bn;
   const AppStrings(this.bn);
-  String get appName => 'G-POINT';
+  String get appName => 'G-PLAY POINT';
   String get dashboard => bn ? 'ড্যাশবোর্ড' : 'Dashboard';
   String get players => bn ? 'প্লেয়ার' : 'Players';
   String get ledger => bn ? 'পয়েন্ট লেজার' : 'Point Ledger';
