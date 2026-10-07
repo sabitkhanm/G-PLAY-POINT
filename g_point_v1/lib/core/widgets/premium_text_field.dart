@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/design_tokens.dart';
 
 class PremiumTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -39,7 +38,8 @@ class PremiumTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, size: 20),
+        prefixIcon:
+            prefixIcon == null ? null : Icon(prefixIcon, size: 20),
         suffixIcon: suffixIcon,
       ),
     );
